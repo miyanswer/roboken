@@ -16,6 +16,8 @@ def main():
 
     # パイプラインを開始
     pipeline.start(config)
+    #シリアル連続阻止
+    previous_command = None
 
     try:
         while True:
@@ -68,17 +70,33 @@ def main():
                 blue_center_y = y + h // 2
                 cv2.circle(output_img, (blue_center_x, blue_center_y), 5, (255, 0, 0), -1)
 
-                if center_x - 80 <= blue_center_x and blue_center_x <= center_x +80:
-                    print("Sending 'w' via serial)")
-                    ser.write(b'w')
-                # 画面中心から160ピクセル以上右の場合に'r'を送信                       
+                #同じシリアルが送信されないようにする
+                #中心から左右80ピクセル以内のとき'w'を送信
+                if center_x - 80 <= blue_center_x <= center_x + 80:
+                    current_command = 'w'
+                # 画面中心から80ピクセル以上右の場合に'r'を送信  
                 elif blue_center_x > center_x + 80:
-                    print("Sending 'r' via serial (right for blue)")
-                    ser.write(b'r')
-                # 画面中心から160ピクセル以上左の場合に'l'を送信
-                elif blue_center_x < center_x - 80:
-                    print("Sending 'l' via serial (left for blue)")
-                    ser.write(b'l')
+                    current_command = 'r'
+                # 画面中心から80ピクセル以上左の場合に'l'を送信
+                elif blue_center_x < center_x -80:
+                    current_command = 'l'
+                else:
+                    current_command = None
+
+                if current_command and current_command != previous_command:
+                    if current_command == 'w':
+                        print("Sending 'w' via serial)")
+                        ser.write(b'w')                     
+                    elif current_command == 'r':
+                        print("Sending 'r' via serial")
+                        ser.write(b'r')
+                    elif current_command == 'l':
+                        print("Sending 'l' via serial")
+                        ser.write(b'l')
+                    #送信したコマンドを前回のコマンドとして更新
+                    previous_command = current_command
+                #インターバル
+                time.sleep(0.1)
 
             # 出力画像を表示
             cv2.imshow('Color Marking', output_img)
