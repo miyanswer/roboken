@@ -44,7 +44,7 @@ def main():
             cv2.line(output_img, (center_x, 0), (center_x, height), (255, 255, 255), 2)
             cv2.line(output_img, (0, center_y), (width, center_y), (255, 255, 255), 2)
 
-            # 赤い領域の輪郭を黄色で囲む（面積が25平方ピクセル以上の場合のみ）
+            # 赤い領域の輪郭を黄色で囲む（面積が350平方ピクセル以上の場合のみ）
             for contour in red_contours:
                 if cv2.contourArea(contour) > 350:
                     cv2.drawContours(output_img, [contour], -1, (0, 255, 255), 2)
@@ -55,7 +55,7 @@ def main():
                         red_center_y = int(M["m01"] / M["m00"])
                         cv2.circle(output_img, (red_center_x, red_center_y), 5, (0, 0, 255), -1)
 
-            # 青い領域の輪郭を黄色で囲む（面積が25平方ピクセル以上の場合のみ）
+            # 青い領域の輪郭を黄色で囲む（面積が350平方ピクセル以上の場合のみ）
             for contour in blue_contours:
                 if cv2.contourArea(contour) > 350:
                     cv2.drawContours(output_img, [contour], -1, (0, 255, 255), 2)
