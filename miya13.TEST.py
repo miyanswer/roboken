@@ -25,9 +25,17 @@ def main():
     wave_obj_men = sa.WaveObject.from_wave_file("men.wav")
     wave_obj_dou = sa.WaveObject.from_wave_file("dou.wav")
     wave_obj_kote = sa.WaveObject.from_wave_file("kote.wav")
+    wave_obj_aisatu = sa.WaveObject.from_wave_file("aisatu.wav")
+    wave_obj_owari = sa.WaveObject.from_wave_file("owari.wav")
+
+    flag = 0
 
     try:
         while True:
+            if flag==0:
+                play_obj = wave_obj_aisatu.play()
+                play_obj.wait_done()
+                flag = 1
             if ser.in_waiting > 0:
                 line = ser.readline().decode('utf-8').rstrip()
                 print(line)
@@ -62,13 +70,13 @@ def main():
             #lower_red = np.array([1, 150, 150])  # 色相、彩度、明度 #kiirotoaka
             #upper_red = np.array([30, 255, 255])
             lower_red1 = np.array([0, 180, 160])  # 色相、彩度、明度
-            upper_red1 = np.array([10, 230, 255])
+            upper_red1 = np.array([9, 230, 255])
             lower_red2 = np.array([170, 140, 90])  # 色相、彩度、明度
             upper_red2 = np.array([179, 172, 228])
-            lower_blue1 = np.array([100, 185, 65])
-            upper_blue1 = np.array([120, 255, 116]) #107,225,100-105
-            lower_blue2 = np.array([100, 170, 90])
-            upper_blue2 = np.array([110, 240, 170])
+            lower_blue = np.array([100, 170, 65])
+            upper_blue = np.array([120, 255, 170]) 
+            #lower_blue = np.array([100, 185, 65])
+            #upper_blue = np.array([120, 255, 116]) #107,225,100-105
             #lower_red = np.array([1, 50, 200])  # 色相、彩度、明度
             #upper_red = np.array([50, 160, 255]) #2,195,220
             #lower_blue = np.array([95, 160, 90])
@@ -76,11 +84,9 @@ def main():
 
             mask_red1 = cv2.inRange(hsv_img, lower_red1, upper_red1)
             mask_red2 = cv2.inRange(hsv_img, lower_red2, upper_red2)
-            mask_blue1 = cv2.inRange(hsv_img, lower_blue1, upper_blue1)
-            mask_blue2 = cv2.inRange(hsv_img, lower_blue2, upper_blue2)
             
             red_mask = cv2.bitwise_or(mask_red1, mask_red2)
-            blue_mask = cv2.bitwise_or(mask_blue1, mask_blue2)
+            blue_mask = cv2.inRange(hsv_img,lower_blue, upper_blue)
 
             # 輪郭を検出
             red_contours, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -102,7 +108,7 @@ def main():
 
             # 青い領域の輪郭を黄色で囲む（面積が800平方ピクセル以上4800未満の場合のみ）
             for contour in blue_contours:
-                if 150 < cv2.contourArea(contour) < 4800:
+                if 150 < cv2.contourArea(contour) < 9000:
                     # 重心を取得
                     M = cv2.moments(contour)
                     if M["m00"] != 0:
@@ -189,6 +195,8 @@ def main():
             # 出力画像を表示
             cv2.imshow('Color Marking', output_img)
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                play_obj = wave_obj_owari.play()
+                play_obj.wait_done()
                 break
 
     finally:
